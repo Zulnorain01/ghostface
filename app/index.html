@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GhostFace Studio — Make your Ghostface horror portrait</title>
+<meta name="description" content="Turn any photo into a cinematic Ghostface horror portrait for the TikTok trend. Upload, pick a scene, generate. Free in your browser.">
+<meta name="theme-color" content="#0B0908">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0908'/%3E%3Cpath d='M32 8c-9 0-15 8-15 18 0 6 2 10 4 14l-3 12 8-4c2 1 4 2 6 2s4-1 6-2l8 4-3-12c2-4 4-8 4-14 0-10-6-18-15-18z' fill='%23F5EFE6'/%3E%3Cellipse cx='25' cy='26' rx='4' ry='7' fill='%230B0908' transform='rotate(-12 25 26)'/%3E%3Cellipse cx='39' cy='26' rx='4' ry='7' fill='%230B0908' transform='rotate(12 39 26)'/%3E%3Cellipse cx='32' cy='40' rx='3' ry='5' fill='%230B0908'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="fog" aria-hidden="true"></div>
+
+<header class="app-header">
+  <a class="brand" href="../" aria-label="GhostFace Studio home">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="26" height="26"><path d="M32 8c-9 0-15 8-15 18 0 6 2 10 4 14l-3 12 8-4c2 1 4 2 6 2s4-1 6-2l8 4-3-12c2-4 4-8 4-14 0-10-6-18-15-18z" fill="#F5EFE6"/><ellipse cx="25" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(-12 25 26)"/><ellipse cx="39" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(12 39 26)"/><ellipse cx="32" cy="40" rx="3" ry="5" fill="#0B0908"/></svg>
+    </span>
+    <span class="brand-name">GhostFace <em>Studio</em></span>
+  </a>
+  <div class="header-actions">
+    <button class="key-pill" id="key-pill" type="button" aria-label="API key settings">
+      <span class="key-dot" id="key-dot" aria-hidden="true"></span>
+      <span id="key-pill-label">No API key</span>
+    </button>
+  </div>
+</header>
+
+<main class="app-main">
+  <ol class="steps" aria-label="Progress">
+    <li class="step is-active" data-step="1"><span class="step-n">1</span><span class="step-t">Photo</span></li>
+    <li class="step" data-step="2"><span class="step-n">2</span><span class="step-t">Scene</span></li>
+    <li class="step" data-step="3"><span class="step-n">3</span><span class="step-t">Haunt</span></li>
+  </ol>
+
+  <!-- STEP 1 — PHOTO -->
+  <section class="panel" id="panel-1" aria-label="Step 1: your photo">
+    <h1 class="panel-title">Drop in your <span class="ember">photo</span></h1>
+    <p class="panel-sub">A clear, front-facing portrait works best. Nothing leaves your browser except the one image you choose to haunt.</p>
+
+    <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload a photo: click to browse or drag and drop an image">
+      <div class="dz-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      </div>
+      <p class="dz-title">Drag &amp; drop your photo here</p>
+      <p class="dz-sub">or <span class="dz-link">browse your files</span> — JPG or PNG</p>
+      <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
+    </div>
+
+    <div class="photo-ready" id="photo-ready" hidden>
+      <img id="photo-thumb" alt="Your uploaded photo">
+      <div class="photo-ready-meta">
+        <p class="photo-ready-name" id="photo-name">photo.jpg</p>
+        <button class="link-btn" id="change-photo" type="button">Choose a different photo</button>
+      </div>
+    </div>
+
+    <div class="samples">
+      <p class="samples-label">No photo handy? Haunt a sample:</p>
+      <div class="sample-row">
+        <button class="sample-btn" type="button" data-sample="1"><img src="assets/sample-1.jpg" alt="Sample portrait 1" loading="lazy"><span>Sample 1</span></button>
+        <button class="sample-btn" type="button" data-sample="2"><img src="assets/sample-2.jpg" alt="Sample portrait 2" loading="lazy"><span>Sample 2</span></button>
+        <button class="sample-btn" type="button" data-sample="3"><img src="assets/sample-3.jpg" alt="Sample portrait 3" loading="lazy"><span>Sample 3</span></button>
+      </div>
+    </div>
+
+    <div class="panel-actions">
+      <button class="btn btn-ember btn-lg" id="to-step-2" type="button" disabled>Pick the scene →</button>
+    </div>
+  </section>
+
+  <!-- STEP 2 — SCENE -->
+  <section class="panel" id="panel-2" aria-label="Step 2: pick a scene" hidden>
+    <h1 class="panel-title">Pick your <span class="ember">nightmare</span></h1>
+    <p class="panel-sub">Where does he find you?</p>
+
+    <div class="scene-grid" role="radiogroup" aria-label="Scene presets">
+      <button class="scene-card is-selected" type="button" role="radio" aria-checked="true" data-scene="lurking">
+        <img src="../assets/hero-after.jpg" alt="Ghostface lurking behind you" loading="lazy">
+        <span class="scene-name">Lurking Behind You</span>
+        <span class="scene-blurb">The classic. He's right there.</span>
+      </button>
+      <button class="scene-card" type="button" role="radio" aria-checked="false" data-scene="hallway">
+        <img src="../assets/scene-hallway.jpg" alt="Ghostface at the end of a dark hallway" loading="lazy">
+        <span class="scene-name">Dark Hallway</span>
+        <span class="scene-blurb">End of the corridor. Don't run.</span>
+      </button>
+      <button class="scene-card" type="button" role="radio" aria-checked="false" data-scene="woods">
+        <img src="../assets/scene-woods.jpg" alt="Ghostface emerging from fog in dark woods" loading="lazy">
+        <span class="scene-name">Foggy Woods</span>
+        <span class="scene-blurb">Moonlight. Fog. Footsteps.</span>
+      </button>
+      <button class="scene-card" type="button" role="radio" aria-checked="false" data-scene="house">
+        <img src="../assets/scene-house.jpg" alt="Ghostface in the doorway of an abandoned house" loading="lazy">
+        <span class="scene-name">Abandoned House</span>
+        <span class="scene-blurb">The door was already open.</span>
+      </button>
+    </div>
+
+    <label class="field-label" for="custom-prompt">Custom direction <span class="opt">(optional)</span></label>
+    <textarea id="custom-prompt" rows="2" maxlength="300" placeholder="e.g. make it rain, add a flickering neon sign behind him…"></textarea>
+
+    <div class="panel-actions split">
+      <button class="btn btn-ghost" id="back-to-1" type="button">← Photo</button>
+      <button class="btn btn-ember btn-lg" id="generate-btn" type="button">🔪 Generate the haunt</button>
+    </div>
+    <p class="fineprint">Uses your own free Gemini API key — one image per generation. <button class="link-btn" id="open-settings-2" type="button">Check key settings</button></p>
+  </section>
+
+  <!-- STEP 3 — RESULT -->
+  <section class="panel" id="panel-3" aria-label="Step 3: your haunt" hidden>
+    <div class="generating" id="generating" hidden>
+      <div class="flicker-mask" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="72" height="72"><path d="M32 8c-9 0-15 8-15 18 0 6 2 10 4 14l-3 12 8-4c2 1 4 2 6 2s4-1 6-2l8 4-3-12c2-4 4-8 4-14 0-10-6-18-15-18z" fill="#F5EFE6"/><ellipse cx="25" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(-12 25 26)"/><ellipse cx="39" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(12 39 26)"/><ellipse cx="32" cy="40" rx="3" ry="5" fill="#0B0908"/></svg>
+      </div>
+      <h1 class="panel-title">Summoning him…</h1>
+      <p class="gen-status" id="gen-status">Waking the mask…</p>
+      <p class="fineprint">This takes 10–30 seconds. Don't close the tab.</p>
+    </div>
+
+    <div class="result" id="result" hidden>
+      <h1 class="panel-title">He <span class="ember">found</span> you.</h1>
+      <div class="result-frame">
+        <img id="result-img" alt="Your Ghostface horror portrait">
+        <span class="result-badge" id="result-badge">FREE · watermarked</span>
+      </div>
+      <div class="panel-actions split wrap">
+        <button class="btn btn-ember btn-lg" id="download-btn" type="button">⬇ Download</button>
+        <button class="btn btn-ghost" id="caption-btn" type="button">📋 Copy TikTok caption</button>
+      </div>
+      <div class="panel-actions split">
+        <button class="btn btn-ghost" id="back-to-2" type="button">← New scene</button>
+        <button class="btn btn-ghost" id="again-btn" type="button">↻ Haunt again</button>
+      </div>
+      <div class="pro-nudge" id="pro-nudge">
+        <p><strong>Want it clean?</strong> Pro removes the watermark and exports at 2048px — <span class="pro-price" data-pro-price>$4.99 one-time</span>.</p>
+        <div class="pro-row">
+          <button class="btn btn-ember btn-sm" id="gopro-btn" type="button">Go Pro</button>
+          <div class="key-row">
+            <input id="key-input" class="key-input" placeholder="GF-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" aria-label="Pro license key">
+            <button id="key-apply" class="btn btn-dark btn-sm" type="button">Unlock</button>
+          </div>
+        </div>
+        <p class="fineprint" id="key-msg" role="status"></p>
+      </div>
+    </div>
+
+    <div class="gen-error" id="gen-error" hidden>
+      <h1 class="panel-title">The mask <span class="ember">slipped.</span></h1>
+      <p id="gen-error-msg">Something went wrong.</p>
+      <div class="panel-actions split">
+        <button class="btn btn-ghost" id="error-back" type="button">← Back</button>
+        <button class="btn btn-ember" id="error-retry" type="button">↻ Try again</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>GhostFace Studio · Your key never leaves this browser · <a href="../">← Back to the crypt (home)</a></p>
+</footer>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settings-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <button class="modal-x" id="settings-close" type="button" aria-label="Close settings">✕</button>
+    <h2 id="settings-title">Your Gemini API key</h2>
+    <p class="modal-sub">GhostFace Studio has no servers and no key of its own — you bring a <strong>free</strong> key from Google AI Studio. It's stored only in this browser (localStorage), never sent anywhere except Google's API.</p>
+    <ol class="key-steps">
+      <li>Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a> (free Google account)</li>
+      <li>Click <strong>Create API key</strong>, copy it</li>
+      <li>Paste it below and save</li>
+    </ol>
+    <label class="field-label" for="api-key-input">API key</label>
+    <input type="password" id="api-key-input" class="text-input" placeholder="AIza…" autocomplete="off" spellcheck="false">
+    <p class="fineprint" id="api-key-msg" role="status"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="api-key-clear" type="button">Remove key</button>
+      <button class="btn btn-ember" id="api-key-save" type="button">Save key</button>
+    </div>
+    <p class="fineprint">Free tier ≈ 50 image generations/day. Your photo + prompt go to Google's Gemini API to render the portrait.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

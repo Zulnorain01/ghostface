@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GhostFace Studio — Turn any photo into a Ghostface horror portrait</title>
+<meta name="description" content="The viral TikTok Ghostface trend, in one tap. Upload a photo, pick a scene, get a cinematic horror portrait with a TikTok-ready caption. Free in your browser.">
+<meta property="og:title" content="GhostFace Studio — He's standing right behind you">
+<meta property="og:description" content="Turn any photo into a cinematic Ghostface horror portrait. Free, in your browser, no sign-up.">
+<meta property="og:image" content="assets/hero-after.jpg">
+<meta name="theme-color" content="#0B0908">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0908'/%3E%3Cpath d='M32 8c-9 0-15 8-15 18 0 6 2 10 4 14l-3 12 8-4c2 1 4 2 6 2s4-1 6-2l8 4-3-12c2-4 4-8 4-14 0-10-6-18-15-18z' fill='%23F5EFE6'/%3E%3Cellipse cx='25' cy='26' rx='4' ry='7' fill='%230B0908' transform='rotate(-12 25 26)'/%3E%3Cellipse cx='39' cy='26' rx='4' ry='7' fill='%230B0908' transform='rotate(12 39 26)'/%3E%3Cellipse cx='32' cy='40' rx='3' ry='5' fill='%230B0908'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app/vendor/fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#" aria-label="GhostFace Studio home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="24" height="24"><path d="M32 8c-9 0-15 8-15 18 0 6 2 10 4 14l-3 12 8-4c2 1 4 2 6 2s4-1 6-2l8 4-3-12c2-4 4-8 4-14 0-10-6-18-15-18z" fill="#F5EFE6"/><ellipse cx="25" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(-12 25 26)"/><ellipse cx="39" cy="26" rx="4" ry="7" fill="#0B0908" transform="rotate(12 39 26)"/><ellipse cx="32" cy="40" rx="3" ry="5" fill="#0B0908"/></svg>
+      </span>
+      <span class="brand-name">GhostFace <em>Studio</em></span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#scenes">Scenes</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-ember btn-sm" href="app/">Open the Studio</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>The TikTok Ghostface trend · one tap</p>
+        <h1>He's standing<br>right <span class="ember">behind&nbsp;you.</span></h1>
+        <p class="lede">Turn any photo into a cinematic Ghostface horror portrait — the "lurking behind you" format blowing up on TikTok and Reels. Upload, pick a scene, post it with a ready-made caption.</p>
+        <div class="hero-cta">
+          <a class="btn btn-ember btn-lg" href="app/">🔪 Haunt my photo — free</a>
+          <a class="btn btn-ghost btn-lg" href="#scenes">See the scenes</a>
+        </div>
+        <p class="hero-note">Free in your browser · No sign-up · ~50 free generations/day with your own free Google key</p>
+      </div>
+      <div class="hero-demo">
+        <div class="ba" id="ba" role="slider" tabindex="0" aria-label="Before and after comparison. Use arrow keys to drag." aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img class="ba-after" src="assets/hero-after.jpg" alt="After: the same photo as a Ghostface horror portrait" draggable="false">
+          <div class="ba-before" aria-hidden="true"><img src="app/assets/sample-1.jpg" alt="" draggable="false"></div>
+          <div class="ba-handle" aria-hidden="true"><span class="ba-knob">⇔</span></div>
+          <span class="ba-tag tag-before">Before</span>
+          <span class="ba-tag tag-after">After</span>
+        </div>
+        <p class="ba-hint">← drag to reveal the horror →</p>
+      </div>
+    </div>
+    <div class="hero-glow" aria-hidden="true"></div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>👻 The Ghostface format is everywhere right now</span><i>✦</i>
+      <span>🔪 One tap. Zero editing skills.</span><i>✦</i>
+      <span>🎃 Halloween is coming — post before everyone else does</span><i>✦</i>
+      <span>📋 TikTok caption + hashtags included</span><i>✦</i>
+      <span>👻 The Ghostface format is everywhere right now</span><i>✦</i>
+      <span>🔪 One tap. Zero editing skills.</span><i>✦</i>
+      <span>🎃 Halloween is coming — post before everyone else does</span><i>✦</i>
+      <span>📋 TikTok caption + hashtags included</span><i>✦</i>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>Thirty seconds.<br><span class="dim">Zero Photoshop.</span></h2>
+      <div class="how-steps">
+        <div class="how-step">
+          <span class="how-num" aria-hidden="true">01</span>
+          <h3>Drop in a photo</h3>
+          <p>Upload a selfie or pick a built-in sample. A clear front-facing portrait haunts best.</p>
+        </div>
+        <div class="how-step">
+          <span class="how-num" aria-hidden="true">02</span>
+          <h3>Pick the nightmare</h3>
+          <p>Lurking behind you, a dark hallway, foggy woods, an abandoned house — or describe your own.</p>
+        </div>
+        <div class="how-step">
+          <span class="how-num" aria-hidden="true">03</span>
+          <h3>Post it</h3>
+          <p>Get your cinematic portrait plus a copy-paste TikTok caption with hashtags. Download, post, watch the comments.</p>
+        </div>
+      </div>
+      <p class="how-key">🔑 It runs on <strong>your own free Gemini API key</strong> — grab one in 30 seconds from Google AI Studio, paste it once, done. Your key never leaves your browser.</p>
+    </div>
+  </section>
+
+  <!-- SCENES -->
+  <section class="scenes" id="scenes">
+    <div class="wrap">
+      <p class="eyebrow">The scenes</p>
+      <h2>Pick where <span class="ember">he finds you.</span></h2>
+      <div class="scene-gallery">
+        <a class="scene-feat" href="app/?scene=lurking">
+          <img src="assets/hero-after.jpg" alt="Ghostface lurking behind you" loading="lazy">
+          <div class="scene-meta"><h3>Lurking Behind You</h3><p>The classic. He's right there. <span class="go">Use this scene →</span></p></div>
+        </a>
+        <a class="scene-tall" href="app/?scene=hallway">
+          <img src="assets/scene-hallway.jpg" alt="Ghostface at the end of a dark hallway" loading="lazy">
+          <div class="scene-meta"><h3>Dark Hallway</h3><p>End of the corridor. <span class="go">→</span></p></div>
+        </a>
+        <a class="scene-wide" href="app/?scene=woods">
+          <img src="assets/scene-woods.jpg" alt="Ghostface emerging from fog in dark woods" loading="lazy">
+          <div class="scene-meta"><h3>Foggy Woods</h3><p>Moonlight. Fog. Footsteps. <span class="go">→</span></p></div>
+        </a>
+        <a class="scene-wide" href="app/?scene=house">
+          <img src="assets/scene-house.jpg" alt="Ghostface in the doorway of an abandoned house" loading="lazy">
+          <div class="scene-meta"><h3>Abandoned House</h3><p>The door was already open. <span class="go">→</span></p></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2>Free to haunt.<br><span class="dim">Pro to haunt clean.</span></h2>
+      <div class="price-row">
+        <div class="price-card">
+          <h3>Free</h3>
+          <p class="price">$0</p>
+          <ul>
+            <li>Unlimited generations <span class="li-note">(within your key's free quota)</span></li>
+            <li>All 4 scenes + custom prompts</li>
+            <li>TikTok caption + hashtag packs</li>
+            <li>1024px export with watermark</li>
+          </ul>
+          <a class="btn btn-ghost" href="app/">Start free</a>
+        </div>
+        <div class="price-card pro">
+          <p class="pro-flag">MOST HAUNTED</p>
+          <h3>Pro</h3>
+          <p class="price">$4.99 <span class="per">one-time</span></p>
+          <ul>
+            <li>Everything in Free</li>
+            <li><strong>No watermark</strong></li>
+            <li><strong>2048px</strong> high-res export</li>
+            <li>Pay once, haunt forever</li>
+          </ul>
+          <a class="btn btn-ember" href="app/#pro" id="pricing-pro-btn">Go Pro — $4.99</a>
+        </div>
+      </div>
+      <p class="price-note">Pro unlocks with a license key after checkout — paste it once in the Studio, it's yours.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="wrap narrow">
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions from <span class="ember">the brave.</span></h2>
+      <details open>
+        <summary>Do I need my own API key?</summary>
+        <p>Yes — and it's free. GhostFace Studio has no servers and no key of its own. Grab a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a> in about 30 seconds, paste it once in the Studio's key settings, and you're set. The free tier covers roughly 50 image generations per day.</p>
+      </details>
+      <details>
+        <summary>Is my API key safe?</summary>
+        <p>It's stored only in your browser's localStorage and sent only to Google's API when you hit Generate. It's never uploaded to us — there is no "us", the whole app runs on this static page.</p>
+      </details>
+      <details>
+        <summary>What photos work best?</summary>
+        <p>Clear, front-facing portraits with good light. The AI keeps your face, likeness and pose recognizable and only transforms the atmosphere around you — blurry or tiny photos give it less to work with.</p>
+      </details>
+      <details>
+        <summary>What do I get with Pro?</summary>
+        <p>Watermark-free downloads at 2048px instead of 1024px. One payment of $4.99, unlocked with a license key — no subscription, no account.</p>
+      </details>
+      <details>
+        <summary>Can I post the results on TikTok?</summary>
+        <p>That's the whole point. Every generation comes with a one-tap "Copy TikTok caption" button with spooky captions and hashtag sets picked for the trend.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap">
+      <h2>Don't let someone else post<br><span class="ember">your scare first.</span></h2>
+      <a class="btn btn-ember btn-lg" href="app/">🔪 Haunt my photo — free</a>
+      <p class="final-note">Halloween is weeks away. The trend is now.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap foot-inner">
+    <p class="foot-brand">GhostFace <em>Studio</em></p>
+    <p class="foot-note">A fan-made trend tool. Not affiliated with the Scream franchise. Your API key never leaves your browser.</p>
+  </div>
+</footer>
+
+<script>
+/* Before/after drag slider */
+(function () {
+  var ba = document.getElementById('ba');
+  if (!ba) return;
+  var pos = 50, dragging = false;
+  function setPos(p) {
+    pos = Math.max(2, Math.min(98, p));
+    ba.style.setProperty('--x', pos + '%');
+    ba.setAttribute('aria-valuenow', Math.round(pos));
+  }
+  function fromEvent(e) {
+    var r = ba.getBoundingClientRect();
+    var x = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX) - r.left;
+    setPos((x / r.width) * 100);
+  }
+  ba.addEventListener('pointerdown', function (e) { dragging = true; ba.setPointerCapture(e.pointerId); fromEvent(e); });
+  ba.addEventListener('pointermove', function (e) { if (dragging) fromEvent(e); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+    ba.addEventListener(ev, function () { dragging = false; });
+  });
+  ba.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { setPos(pos - 5); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { setPos(pos + 5); e.preventDefault(); }
+  });
+  // gentle idle animation until first interaction
+  var idle = setInterval(function () {
+    if (dragging || document.activeElement === ba) { clearInterval(idle); return; }
+    setPos(50 + Math.sin(Date.now() / 1400) * 14);
+  }, 60);
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+    ba.addEventListener(ev, function clear() { clearInterval(idle); ba.removeEventListener(ev, clear); }, { once: true });
+  });
+  setPos(50);
+})();
+</script>
+</body>
+</html>
