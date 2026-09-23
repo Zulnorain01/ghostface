@@ -17,8 +17,9 @@ const CFG = window.GHOSTFACE_CONFIG || {};
 const PRO_PRICE = CFG.PRO_PRICE || '$4.99 one-time';
 const PAYMENT_URL = CFG.PAYMENT_URL || 'https://www.example.com/ghostface-pro-checkout';
 
-const API_MODEL = 'gemini-2.5-flash-image';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/' + API_MODEL + ':generateContent';
+const API_MODEL = 'gemini-3.1-flash-image'; // Nano Banana 2 — current image model (2.5-flash-image is legacy, unavailable to new keys)
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+const TEXT_MODEL = 'gemini-3.8-flash'; // cheap text model used only by the key self-test
 
 const LS_API_KEY = 'ghostface_api_key';
 const LS_PRO_KEY = 'ghostface_key';
@@ -274,6 +275,30 @@ async function googleErrorDetail(res) {
   }
 }
 
+/* Find the generated image in an Interactions API response.
+   REST returns the full Interaction resource; scan the step content blocks
+   for an image, and tolerate a few naming variants. */
+function extractImage(json) {
+  const roots = [json, json && json.interaction].filter(Boolean);
+  for (const r of roots) {
+    const out = r.output_image || r.outputImage;
+    if (out && out.data) {
+      return { data: out.data, mime: out.mime_type || out.mimeType || 'image/png' };
+    }
+    const steps = r.steps || [];
+    for (const s of steps) {
+      const content = s.content || [];
+      for (const c of content) {
+        const blk = c.image || c;
+        if ((c.type === 'image' || c.image) && blk && blk.data) {
+          return { data: blk.data, mime: blk.mime_type || blk.mimeType || 'image/png' };
+        }
+      }
+    }
+  }
+  return null;
+}
+
 /* Cheap text-only call to check whether a key itself is valid.
    Distinguishes "bad key" (400/401/403) from "image quota empty" (429 on images only). */
 async function testApiKey() {
@@ -283,10 +308,10 @@ async function testApiKey() {
   el.apiKeyMsg.textContent = 'Testing key…';
   el.apiKeyMsg.className = 'fineprint';
   try {
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+    const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': v },
-      body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with the word OK' }] }] }),
+      body: JSON.stringify({ model: TEXT_MODEL, input: 'Reply with the word OK' }),
     });
     if (res.ok) {
       el.apiKeyMsg.textContent = 'Key works — Google answered. If image generation still fails with a quota error, the free image allowance (not the key) is the problem.';
@@ -342,11 +367,11 @@ async function generate() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
-        contents: [{ parts: [
-          { inlineData: { mimeType: 'image/jpeg', data: b64 } },
-          { text: prompt },
-        ] }],
-        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
+        model: API_MODEL,
+        input: [
+          { type: 'image', data: b64, mime_type: 'image/jpeg' },
+          { type: 'text', text: prompt },
+        ],
       }),
     });
     if (!res.ok) {
@@ -356,11 +381,9 @@ async function generate() {
       throw err;
     }
     const json = await res.json();
-    const parts = (((json.candidates || [])[0] || {}).content || {}).parts || [];
-    const imgPart = parts.find((p) => p.inlineData && p.inlineData.data);
-    if (!imgPart) throw new Error('The model answered without an image. Try again — sometimes it needs a second attempt.');
-    const mime = imgPart.inlineData.mimeType || 'image/png';
-    state.result = 'data:' + mime + ';base64,' + imgPart.inlineData.data;
+    const img = extractImage(json);
+    if (!img) throw new Error('The model answered without an image. Try again — sometimes it needs a second attempt.');
+    state.result = 'data:' + img.mime + ';base64,' + img.data;
     showResult();
   } catch (err) {
     el.genErrorMsg.textContent = err.message || 'Something went wrong.';
