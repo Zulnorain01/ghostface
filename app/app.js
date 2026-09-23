@@ -121,10 +121,12 @@ const el = {
   proNudge: $('pro-nudge'), goproBtn: $('gopro-btn'),
   keyInput: $('key-input'), keyApply: $('key-apply'), keyMsg: $('key-msg'),
   genError: $('gen-error'), genErrorMsg: $('gen-error-msg'),
+  genErrorDetail: $('gen-error-detail'), genErrorDetails: $('gen-error-details'),
   errorBack: $('error-back'), errorRetry: $('error-retry'),
   settingsModal: $('settings-modal'), settingsClose: $('settings-close'),
   apiKeyInput: $('api-key-input'), apiKeySave: $('api-key-save'),
   apiKeyClear: $('api-key-clear'), apiKeyMsg: $('api-key-msg'),
+  apiKeyTest: $('api-key-test'),
   toast: $('toast'),
 };
 
@@ -256,9 +258,52 @@ function imageToBase64(img, maxSide) {
 function friendlyApiError(status) {
   if (status === 400) return 'The API key looks invalid. Double-check it in key settings — copy the full key from AI Studio.';
   if (status === 401 || status === 403) return 'Google rejected the API key (unauthorized). Paste a fresh key from AI Studio.';
-  if (status === 429) return 'Rate limit hit — the free tier allows about 50 images/day. Wait a bit and try again.';
+  if (status === 429) return 'Google refused the request — the free image quota on this key looks empty right now. On a brand-new key this usually means the quota has not activated yet (wait a few minutes, then retry) or the free image allowance is not available for this project/region. Use "Test key" in key settings to see the exact reason.';
   if (status >= 500) return 'Google\'s servers hiccupped. Wait a moment and try again.';
   return 'The API returned an error (status ' + status + '). Try again in a bit.';
+}
+
+/* Pull Google's raw error message out of a failed response, for the details box. */
+async function googleErrorDetail(res) {
+  try {
+    const ej = await res.json();
+    const msg = ej && ej.error && ej.error.message;
+    return msg ? ('Google said (HTTP ' + res.status + '): ' + msg) : ('HTTP ' + res.status + ' ' + (res.statusText || ''));
+  } catch (e) {
+    return 'HTTP ' + res.status + ' ' + (res.statusText || '');
+  }
+}
+
+/* Cheap text-only call to check whether a key itself is valid.
+   Distinguishes "bad key" (400/401/403) from "image quota empty" (429 on images only). */
+async function testApiKey() {
+  const v = el.apiKeyInput.value.trim() || getApiKey();
+  if (!v) { el.apiKeyMsg.textContent = 'Paste a key first.'; el.apiKeyMsg.className = 'fineprint bad'; return; }
+  el.apiKeyTest.disabled = true;
+  el.apiKeyMsg.textContent = 'Testing key…';
+  el.apiKeyMsg.className = 'fineprint';
+  try {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': v },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with the word OK' }] }] }),
+    });
+    if (res.ok) {
+      el.apiKeyMsg.textContent = 'Key works — Google answered. If image generation still fails with a quota error, the free image allowance (not the key) is the problem.';
+      el.apiKeyMsg.className = 'fineprint ok';
+    } else {
+      const detail = await googleErrorDetail(res);
+      el.apiKeyMsg.textContent = (res.status === 429
+        ? 'Key is recognized but its quota is empty right now. '
+        : 'Key problem (HTTP ' + res.status + '). ') + detail;
+      el.apiKeyMsg.className = 'fineprint bad';
+    }
+  } catch (e) {
+    el.apiKeyMsg.textContent = 'Could not reach Google — check your connection and retry.';
+    el.apiKeyMsg.className = 'fineprint bad';
+  } finally {
+    el.apiKeyTest.disabled = false;
+  }
 }
 
 const GEN_TICKER = [
@@ -281,6 +326,7 @@ async function generate() {
   showStep(3);
   el.result.hidden = true;
   el.genError.hidden = true;
+  el.genErrorDetails.hidden = true;
   el.generating.hidden = false;
   let tick = 0;
   el.genStatus.textContent = GEN_TICKER[0];
@@ -303,7 +349,12 @@ async function generate() {
         generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
       }),
     });
-    if (!res.ok) throw new Error(friendlyApiError(res.status));
+    if (!res.ok) {
+      const detail = await googleErrorDetail(res);
+      const err = new Error(friendlyApiError(res.status));
+      err.detail = detail;
+      throw err;
+    }
     const json = await res.json();
     const parts = (((json.candidates || [])[0] || {}).content || {}).parts || [];
     const imgPart = parts.find((p) => p.inlineData && p.inlineData.data);
@@ -313,6 +364,12 @@ async function generate() {
     showResult();
   } catch (err) {
     el.genErrorMsg.textContent = err.message || 'Something went wrong.';
+    if (err.detail) {
+      el.genErrorDetail.textContent = err.detail;
+      el.genErrorDetails.hidden = false;
+    } else {
+      el.genErrorDetails.hidden = true;
+    }
     el.genError.hidden = false;
   } finally {
     clearInterval(genTickTimer);
@@ -530,6 +587,7 @@ function init() {
     el.apiKeyMsg.textContent = 'Key removed from this browser.';
     el.apiKeyMsg.className = 'fineprint';
   });
+  el.apiKeyTest.addEventListener('click', testApiKey);
 
   refreshKeyPill();
 

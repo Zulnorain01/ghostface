@@ -209,6 +209,11 @@ textarea:focus, .text-input:focus { outline: none; border-color: var(--ember); }
 
 .gen-error { text-align: center; padding: 30px 10px; }
 .gen-error p { color: var(--muted); line-height: 1.6; }
+.fineprint.ok { color: #7ee2a8; }
+.fineprint.bad { color: #ff9d7a; }
+.err-details { max-width: 560px; margin: 18px auto 0; text-align: left; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 14px; background: rgba(255,255,255,.03); }
+.err-details summary { cursor: pointer; color: var(--faint); font-size: 13px; }
+.err-details p { font-size: 12.5px; color: var(--muted); word-break: break-word; margin: 8px 0 4px; font-family: ui-monospace, monospace; }
 
 .pro-nudge {
   margin-top: 26px; border: 1px dashed #4A3826; border-radius: var(--r-lg);

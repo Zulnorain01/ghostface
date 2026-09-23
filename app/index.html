@@ -150,6 +150,10 @@
     <div class="gen-error" id="gen-error" hidden>
       <h1 class="panel-title">The mask <span class="ember">slipped.</span></h1>
       <p id="gen-error-msg">Something went wrong.</p>
+      <details class="err-details" id="gen-error-details" hidden>
+        <summary>Technical details (what Google actually said)</summary>
+        <p id="gen-error-detail"></p>
+      </details>
       <div class="panel-actions split">
         <button class="btn btn-ghost" id="error-back" type="button">← Back</button>
         <button class="btn btn-ember" id="error-retry" type="button">↻ Try again</button>
@@ -178,6 +182,7 @@
     <p class="fineprint" id="api-key-msg" role="status"></p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="api-key-clear" type="button">Remove key</button>
+      <button class="btn btn-ghost btn-sm" id="api-key-test" type="button">Test key</button>
       <button class="btn btn-ember" id="api-key-save" type="button">Save key</button>
     </div>
     <p class="fineprint">Free tier ≈ 50 image generations/day. Your photo + prompt go to Google's Gemini API to render the portrait.</p>
