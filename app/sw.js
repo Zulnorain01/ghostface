@@ -8,7 +8,7 @@
    Bump CACHE_NAME when shipping a new build.
    ============================================================ */
 
-const CACHE_NAME = 'ghostface-v1';
+const CACHE_NAME = 'ghostface-v2';
 
 const APP_SHELL = [
   './',
