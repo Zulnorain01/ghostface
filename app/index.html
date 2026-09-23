@@ -170,22 +170,38 @@
 <div class="modal-backdrop" id="settings-modal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <button class="modal-x" id="settings-close" type="button" aria-label="Close settings">✕</button>
-    <h2 id="settings-title">Your Gemini API key</h2>
-    <p class="modal-sub">GhostFace Studio has no servers and no key of its own — you bring a <strong>free</strong> key from Google AI Studio. It's stored only in this browser (localStorage), never sent anywhere except Google's API.</p>
-    <ol class="key-steps">
-      <li>Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a> (free Google account)</li>
-      <li>Click <strong>Create API key</strong>, copy it</li>
-      <li>Paste it below and save</li>
-    </ol>
-    <label class="field-label" for="api-key-input">API key</label>
-    <input type="password" id="api-key-input" class="text-input" placeholder="AIza…" autocomplete="off" spellcheck="false">
+    <h2 id="settings-title">AI provider</h2>
+    <p class="modal-sub">GhostFace Studio has no servers and no key of its own — you bring a <strong>free</strong> key from Google or Hugging Face. It's stored only in this browser (localStorage), never sent anywhere except the provider's API.</p>
+    <div class="provider-row" role="tablist" aria-label="AI provider">
+      <button class="provider-btn" id="provider-gemini" type="button" role="tab" aria-selected="true">✦ Gemini</button>
+      <button class="provider-btn" id="provider-hf" type="button" role="tab" aria-selected="false">🤗 Hugging Face</button>
+    </div>
+    <div id="gemini-key-wrap">
+      <ol class="key-steps">
+        <li>Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a> (free Google account)</li>
+        <li>Click <strong>Create API key</strong>, copy it</li>
+        <li>Paste it below and save</li>
+      </ol>
+      <label class="field-label" for="api-key-input">Gemini API key</label>
+      <input type="password" id="api-key-input" class="text-input" placeholder="AIza…" autocomplete="off" spellcheck="false">
+      <p class="fineprint">Free image quota varies by Google project/region — check yours in AI Studio. Your photo + prompt go to Google's Gemini API to render the portrait.</p>
+    </div>
+    <div id="hf-key-wrap" hidden>
+      <ol class="key-steps">
+        <li>Open <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> (free account)</li>
+        <li>Click <strong>Create new token</strong>, copy it</li>
+        <li>Paste it below and save</li>
+      </ol>
+      <label class="field-label" for="hf-token-input">Hugging Face token</label>
+      <input type="password" id="hf-token-input" class="text-input" placeholder="hf_…" autocomplete="off" spellcheck="false">
+      <p class="fineprint">Free backup renderer (Qwen-Image-Edit). Free tokens are rate-limited and the model can take ~30–60s to wake up on first use — quality is rougher than Gemini.</p>
+    </div>
     <p class="fineprint" id="api-key-msg" role="status"></p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="api-key-clear" type="button">Remove key</button>
       <button class="btn btn-ghost btn-sm" id="api-key-test" type="button">Test key</button>
       <button class="btn btn-ember" id="api-key-save" type="button">Save key</button>
     </div>
-    <p class="fineprint">Free image quota varies by Google project/region — check yours in AI Studio. Your photo + prompt go to Google's Gemini API to render the portrait.</p>
   </div>
 </div>
 

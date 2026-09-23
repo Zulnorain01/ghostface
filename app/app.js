@@ -21,6 +21,14 @@ const API_MODEL = 'gemini-3.1-flash-image'; // Nano Banana 2 — current image m
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const TEXT_MODEL = 'gemini-3.8-flash'; // cheap text model used only by the key self-test
 
+// Hugging Face backup provider (free token, no card). Instruction-based image editing.
+const HF_MODEL = 'Qwen/Qwen-Image-Edit';
+const HF_API = 'https://api-inference.huggingface.co/models/';
+const HF_WHOAMI = 'https://huggingface.co/api/whoami'; // cheap token self-test (no inference cost)
+
+const LS_PROVIDER = 'ghostface_provider'; // 'gemini' | 'hf'
+const LS_HF_TOKEN = 'ghostface_hf_token';
+
 const LS_API_KEY = 'ghostface_api_key';
 const LS_PRO_KEY = 'ghostface_key';
 
@@ -128,6 +136,9 @@ const el = {
   apiKeyInput: $('api-key-input'), apiKeySave: $('api-key-save'),
   apiKeyClear: $('api-key-clear'), apiKeyMsg: $('api-key-msg'),
   apiKeyTest: $('api-key-test'),
+  hfTokenInput: $('hf-token-input'),
+  providerGemini: $('provider-gemini'), providerHf: $('provider-hf'),
+  geminiKeyWrap: $('gemini-key-wrap'), hfKeyWrap: $('hf-key-wrap'),
   toast: $('toast'),
 };
 
@@ -155,17 +166,41 @@ function getApiKey() {
   try { return (localStorage.getItem(LS_API_KEY) || '').trim(); }
   catch (e) { return ''; }
 }
+function getProvider() {
+  try { return localStorage.getItem(LS_PROVIDER) === 'hf' ? 'hf' : 'gemini'; }
+  catch (e) { return 'gemini'; }
+}
+function getHfToken() {
+  try { return (localStorage.getItem(LS_HF_TOKEN) || '').trim(); }
+  catch (e) { return ''; }
+}
 function refreshKeyPill() {
-  const has = !!getApiKey();
+  const p = getProvider();
+  const has = p === 'hf' ? !!getHfToken() : !!getApiKey();
   el.keyPill.classList.toggle('has-key', has);
-  el.keyPillLabel.textContent = has ? 'API key set' : 'No API key';
+  el.keyPillLabel.textContent = has ? (p === 'hf' ? 'HF token set' : 'Gemini key set') : 'No API key';
+}
+function selectProvider(p) {
+  const isHf = p === 'hf';
+  el.providerGemini.classList.toggle('is-active', !isHf);
+  el.providerHf.classList.toggle('is-active', isHf);
+  el.providerGemini.setAttribute('aria-selected', String(!isHf));
+  el.providerHf.setAttribute('aria-selected', String(isHf));
+  el.geminiKeyWrap.hidden = isHf;
+  el.hfKeyWrap.hidden = !isHf;
+  el.apiKeyMsg.textContent = '';
+  el.apiKeyMsg.className = 'fineprint';
+  try { localStorage.setItem(LS_PROVIDER, isHf ? 'hf' : 'gemini'); } catch (e) {}
+  refreshKeyPill();
 }
 function openSettings(notice) {
   el.apiKeyInput.value = '';
+  el.hfTokenInput.value = '';
   el.apiKeyMsg.textContent = notice || '';
   el.apiKeyMsg.className = 'fineprint';
+  selectProvider(getProvider());
   el.settingsModal.hidden = false;
-  setTimeout(() => el.apiKeyInput.focus(), 50);
+  setTimeout(() => (getProvider() === 'hf' ? el.hfTokenInput : el.apiKeyInput).focus(), 50);
 }
 function closeSettings() { el.settingsModal.hidden = true; }
 
@@ -302,6 +337,7 @@ function extractImage(json) {
 /* Cheap text-only call to check whether a key itself is valid.
    Distinguishes "bad key" (400/401/403) from "image quota empty" (429 on images only). */
 async function testApiKey() {
+  if (getProvider() === 'hf') return testHfToken();
   const v = el.apiKeyInput.value.trim() || getApiKey();
   if (!v) { el.apiKeyMsg.textContent = 'Paste a key first.'; el.apiKeyMsg.className = 'fineprint bad'; return; }
   el.apiKeyTest.disabled = true;
@@ -331,6 +367,73 @@ async function testApiKey() {
   }
 }
 
+/* ---------------- Hugging Face backup provider ----------------
+   Free token, instruction-based image editing via Qwen-Image-Edit.
+   Success returns raw image bytes; errors return JSON { error }. */
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(new Error('Could not read the generated image.'));
+    r.readAsDataURL(blob);
+  });
+}
+function hfFriendlyError(status, raw) {
+  const msg = String(raw || '');
+  if (status === 503 || /loading|warming/i.test(msg))
+    return 'The free Hugging Face model is waking up (cold start). Wait ~30 seconds and hit Try again.';
+  if (status === 401 || status === 403)
+    return 'Hugging Face rejected the token. Open settings, check the token at huggingface.co/settings/tokens, and paste it again.';
+  if (status === 429)
+    return 'Hugging Face free rate limit hit. Wait a few minutes, then hit Try again.';
+  if (status === 400 && /not supported/i.test(msg))
+    return 'This Hugging Face model is not available on the free API right now. Try again later, or switch back to Gemini in settings.';
+  return 'Hugging Face error (HTTP ' + status + '). ' + (msg ? msg.slice(0, 220) : 'Try again in a bit.');
+}
+async function generateWithHF(prompt, rawBase64, token) {
+  const res = await fetch(HF_API + HF_MODEL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ inputs: rawBase64, parameters: { prompt } }),
+  });
+  const ct = res.headers.get('content-type') || '';
+  if (!res.ok || ct.includes('json')) {
+    let raw = 'HTTP ' + res.status;
+    try { const j = await res.json(); raw = j.error || JSON.stringify(j); } catch (e) {}
+    const err = new Error(hfFriendlyError(res.status, raw));
+    err.detail = String(raw).slice(0, 500);
+    throw err;
+  }
+  return await blobToDataURL(await res.blob());
+}
+
+/* Cheap token check via the Hub API (no inference cost).
+   Distinguishes "bad token" (401) from "model busy/rate-limited". */
+async function testHfToken() {
+  const v = el.hfTokenInput.value.trim() || getHfToken();
+  if (!v) { el.apiKeyMsg.textContent = 'Paste a token first.'; el.apiKeyMsg.className = 'fineprint bad'; return; }
+  el.apiKeyTest.disabled = true;
+  el.apiKeyMsg.textContent = 'Checking token…';
+  el.apiKeyMsg.className = 'fineprint';
+  try {
+    const res = await fetch(HF_WHOAMI, { headers: { Authorization: 'Bearer ' + v } });
+    if (res.ok) {
+      let name = '';
+      try { name = (await res.json()).name || ''; } catch (e) {}
+      el.apiKeyMsg.textContent = 'Token works' + (name ? ' — signed in as ' + name : '') + '. Note: the free image model is rate-limited and may need ~30s to wake up on first use.';
+      el.apiKeyMsg.className = 'fineprint ok';
+    } else {
+      el.apiKeyMsg.textContent = 'Token rejected (HTTP ' + res.status + '). Check it at huggingface.co/settings/tokens and paste it again.';
+      el.apiKeyMsg.className = 'fineprint bad';
+    }
+  } catch (e) {
+    el.apiKeyMsg.textContent = 'Could not reach Hugging Face — check your connection and retry.';
+    el.apiKeyMsg.className = 'fineprint bad';
+  } finally {
+    el.apiKeyTest.disabled = false;
+  }
+}
+
 const GEN_TICKER = [
   'Waking the mask…',
   'Fog rolling in…',
@@ -343,8 +446,14 @@ let genTickTimer = null;
 
 async function generate() {
   if (state.generating) return;
-  const key = getApiKey();
-  if (!key) { openSettings('Paste your free Gemini API key first — it takes 30 seconds.'); return; }
+  const provider = getProvider();
+  const key = provider === 'hf' ? getHfToken() : getApiKey();
+  if (!key) {
+    openSettings(provider === 'hf'
+      ? 'Paste your free Hugging Face token first — huggingface.co/settings/tokens.'
+      : 'Paste your free Gemini API key first — it takes 30 seconds.');
+    return;
+  }
   if (!state.photo) { toast('Add a photo first.'); showStep(1); return; }
 
   state.generating = true;
@@ -363,27 +472,31 @@ async function generate() {
   try {
     const b64 = imageToBase64(state.photo.img, UPLOAD_MAX_SIDE);
     const prompt = buildPrompt(state.scene, el.customPrompt.value);
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({
-        model: API_MODEL,
-        input: [
-          { type: 'image', data: b64, mime_type: 'image/jpeg' },
-          { type: 'text', text: prompt },
-        ],
-      }),
-    });
-    if (!res.ok) {
-      const detail = await googleErrorDetail(res);
-      const err = new Error(friendlyApiError(res.status));
-      err.detail = detail;
-      throw err;
+    if (provider === 'hf') {
+      state.result = await generateWithHF(prompt, b64, key);
+    } else {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          model: API_MODEL,
+          input: [
+            { type: 'image', data: b64, mime_type: 'image/jpeg' },
+            { type: 'text', text: prompt },
+          ],
+        }),
+      });
+      if (!res.ok) {
+        const detail = await googleErrorDetail(res);
+        const err = new Error(friendlyApiError(res.status));
+        err.detail = detail;
+        throw err;
+      }
+      const json = await res.json();
+      const img = extractImage(json);
+      if (!img) throw new Error('The model answered without an image. Try again — sometimes it needs a second attempt.');
+      state.result = 'data:' + img.mime + ';base64,' + img.data;
     }
-    const json = await res.json();
-    const img = extractImage(json);
-    if (!img) throw new Error('The model answered without an image. Try again — sometimes it needs a second attempt.');
-    state.result = 'data:' + img.mime + ';base64,' + img.data;
     showResult();
   } catch (err) {
     el.genErrorMsg.textContent = err.message || 'Something went wrong.';
@@ -595,22 +708,27 @@ function init() {
   el.settingsModal.addEventListener('click', (e) => { if (e.target === el.settingsModal) closeSettings(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.settingsModal.hidden) closeSettings(); });
   el.apiKeySave.addEventListener('click', () => {
-    const v = el.apiKeyInput.value.trim();
-    if (!v) { el.apiKeyMsg.textContent = 'Paste a key first.'; el.apiKeyMsg.className = 'fineprint bad'; return; }
-    try { localStorage.setItem(LS_API_KEY, v); } catch (e) {}
+    const p = getProvider();
+    const isHf = p === 'hf';
+    const v = (isHf ? el.hfTokenInput.value : el.apiKeyInput.value).trim();
+    if (!v) { el.apiKeyMsg.textContent = isHf ? 'Paste a token first.' : 'Paste a key first.'; el.apiKeyMsg.className = 'fineprint bad'; return; }
+    try { localStorage.setItem(isHf ? LS_HF_TOKEN : LS_API_KEY, v); } catch (e) {}
     refreshKeyPill();
-    el.apiKeyMsg.textContent = 'Key saved in this browser. You\'re ready to haunt.';
+    el.apiKeyMsg.textContent = isHf ? 'Token saved in this browser. You\'re ready to haunt.' : 'Key saved in this browser. You\'re ready to haunt.';
     el.apiKeyMsg.className = 'fineprint ok';
     setTimeout(closeSettings, 900);
   });
   el.apiKeyClear.addEventListener('click', () => {
-    try { localStorage.removeItem(LS_API_KEY); } catch (e) {}
-    el.apiKeyInput.value = '';
+    const isHf = getProvider() === 'hf';
+    try { localStorage.removeItem(isHf ? LS_HF_TOKEN : LS_API_KEY); } catch (e) {}
+    if (isHf) el.hfTokenInput.value = ''; else el.apiKeyInput.value = '';
     refreshKeyPill();
-    el.apiKeyMsg.textContent = 'Key removed from this browser.';
+    el.apiKeyMsg.textContent = isHf ? 'Token removed from this browser.' : 'Key removed from this browser.';
     el.apiKeyMsg.className = 'fineprint';
   });
   el.apiKeyTest.addEventListener('click', testApiKey);
+  el.providerGemini.addEventListener('click', () => selectProvider('gemini'));
+  el.providerHf.addEventListener('click', () => selectProvider('hf'));
 
   refreshKeyPill();
 

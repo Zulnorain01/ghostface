@@ -255,6 +255,17 @@ textarea:focus, .text-input:focus { outline: none; border-color: var(--ember); }
 .key-steps { margin: 0 0 18px; padding-left: 20px; color: var(--muted); font-size: 14.5px; line-height: 1.7; }
 .key-steps a { color: var(--ember); font-weight: 700; }
 .modal-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.provider-row { display: flex; gap: 8px; margin: 0 0 18px; }
+.provider-btn {
+  flex: 1; padding: 10px 12px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--muted);
+  font-weight: 700; font-size: 14.5px; font-family: inherit; transition: all .18s ease;
+}
+.provider-btn.is-active {
+  border-color: var(--ember); color: var(--ink);
+  background: color-mix(in srgb, var(--ember) 14%, transparent);
+  box-shadow: 0 0 0 1px var(--ember) inset;
+}
 
 /* ---------- toast / footer ---------- */
 .toast {
